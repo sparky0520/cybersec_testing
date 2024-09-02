@@ -10,27 +10,61 @@ app.use(express.static("public"))
 
 const db = new sqlite3.Database(path.join(__dirname, 'database.db'), (err) => {
     if (err) {
-        console.error("Error connecting to sql database: ", err.message)
+        console.error("Error connecting to SQLite database: ", err.message);
     } else {
-        console.log("Connected to the SQLite Database.")
+        console.log("Connected to the SQLite Database.");
 
-        // Creating employee table
-        const query = `
-            create table if not exists employee(
+        // Creating the employee table
+        const createTableQuery = `
+            CREATE TABLE IF NOT EXISTS employee(
                 emp_id TEXT PRIMARY KEY,
-                password TEXT NOT NULL
+                password TEXT NOT NULL,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                email TEXT NOT NULL,
+                accessToken TEXT NOT NULL
             );
         `;
 
-        db.run(query, (err) => {
+        db.run(createTableQuery, (err) => {
             if (err) {
-                console.error("Error creating employee table: ", err.message)
+                console.error("Error creating employee table: ", err.message);
             } else {
-                console.log("Employee table is ready.")
+                console.log("Employee table is ready.");
+
+                // Inserting data into the employee table
+                const insertQuery = `
+                    INSERT INTO employee (
+                        emp_id, 
+                        password, 
+                        name, 
+                        phone, 
+                        email, 
+                        accessToken
+                    ) VALUES (?, ?, ?, ?, ?, ?);
+                `;
+
+                // Values to insert
+                const values = [
+                    'EMP003',                      // emp_id
+                    'afkwefeaflalflkseljdslkfaj',  // password (use hashed value)
+                    'Balma',                       // name
+                    '8448068999',                  // phone
+                    'takenhero03@gmail.com',       // email
+                    '621591685924'                 // accessToken
+                ];
+
+                db.run(insertQuery, values, (err) => {
+                    if (err) {
+                        console.error("Error inserting data into employee table: ", err.message);
+                    } else {
+                        console.log("Data inserted into Employee table.");
+                    }
+                });
             }
-        })
+        });
     }
-})
+});
 
 let message = ''
 app.get("/", (req, res) => {
@@ -65,7 +99,7 @@ app.post("/auth", (req, res) => {
         // Vulnerable query with direct user input embedding
         // Ensure the inputs are surrounded by single quotes
         const loginQuery = `SELECT * FROM employee WHERE emp_id='${emp_id}' AND password='${password}';`;
-        console.log("Constructed Query: ",loginQuery)
+        console.log("Constructed Query: ", loginQuery)
         db.get(loginQuery, [], (err, row) => {
             if (err) {
                 console.log(err)
@@ -74,7 +108,12 @@ app.post("/auth", (req, res) => {
             }
             if (row) {
                 message = '';
-                return res.send("admin login page here");
+                console.log(row)
+                return res.render("dashboard.ejs",
+                    {
+                        row
+                    }
+                );
             } else {
                 message = 'Invalid employee ID or password.';
                 return res.redirect('/etc/login');
@@ -85,7 +124,7 @@ app.post("/auth", (req, res) => {
         message = 'An unexpected error occurred.';
         return res.redirect('/etc/login');
     } finally {
-        console.log("Emp_id entered: "+emp_id,"\nPassword entered: "+password);
+        console.log("Emp_id entered: " + emp_id, "\nPassword entered: " + password);
     }
 });
 
