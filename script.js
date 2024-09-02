@@ -1,0 +1,100 @@
+const express = require("express")
+const sqlite3 = require('sqlite3')
+const path = require('path')
+
+const app = express()
+const PORT = 3000
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"))
+
+const db = new sqlite3.Database(path.join(__dirname, 'database.db'), (err) => {
+    if (err) {
+        console.error("Error connecting to sql database: ", err.message)
+    } else {
+        console.log("Connected to the SQLite Database.")
+
+        // Creating employee table
+        const query = `
+            create table if not exists employee(
+                emp_id TEXT PRIMARY KEY,
+                password TEXT NOT NULL
+            );
+        `;
+
+        db.run(query, (err) => {
+            if (err) {
+                console.error("Error creating employee table: ", err.message)
+            } else {
+                console.log("Employee table is ready.")
+            }
+        })
+    }
+})
+
+let message = ''
+app.get("/", (req, res) => {
+    res.render("index.ejs")
+})
+
+app.get("/robots.txt", (req, res) => {
+    res.send("Instructions for all robots out there!<br><br>Flag: 123077")
+})
+
+app.get("/login", (req, res) => {
+    res.render("fakeLogin.ejs")
+})
+
+app.get("/etc/login", (req, res) => {
+    res.render("realLogin.ejs",
+        {
+            message
+        }
+    )
+})
+
+app.post("/auth", (req, res) => {
+    const { emp_id, password } = req.body;
+
+    try {
+        if (emp_id === '' || password === '') {
+            message = 'Employee ID and password are required.';
+            return res.redirect('/etc/login');
+        }
+
+        // Vulnerable query with direct user input embedding
+        // Ensure the inputs are surrounded by single quotes
+        const loginQuery = `SELECT * FROM employee WHERE emp_id='${emp_id}' AND password='${password}';`;
+        console.log("Constructed Query: ",loginQuery)
+        db.get(loginQuery, [], (err, row) => {
+            if (err) {
+                console.log(err)
+                message = err.message;
+                return res.redirect('/etc/login');
+            }
+            if (row) {
+                message = '';
+                return res.send("admin login page here");
+            } else {
+                message = 'Invalid employee ID or password.';
+                return res.redirect('/etc/login');
+            }
+        });
+    } catch (err) {
+        console.error("Caught error:", err);
+        message = 'An unexpected error occurred.';
+        return res.redirect('/etc/login');
+    } finally {
+        console.log("Emp_id entered: "+emp_id,"\nPassword entered: "+password);
+    }
+});
+
+
+app.listen(PORT, (err) => {
+    if (!err) {
+        console.log(`server running at: http://127.0.0.1:${PORT}`)
+    }
+    else {
+        console.log("Error starting server: ", err)
+    }
+})
