@@ -72,7 +72,7 @@ app.get("/", (req, res) => {
 })
 
 app.get("/robots.txt", (req, res) => {
-    res.send("Instructions for all robots out there!<br><br>Flag: 123077")
+    res.send("Instructions for all robots out there!<br><br>Flag: spectre{ROBOTSTXT}")
 })
 
 app.get("/login", (req, res) => {
