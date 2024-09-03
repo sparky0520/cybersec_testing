@@ -79,7 +79,7 @@ app.get("/login", (req, res) => {
     res.render("fakeLogin.ejs")
 })
 
-app.get("/etc/login", (req, res) => {
+app.get("/www", (req, res) => {
     res.render("realLogin.ejs",
         {
             message
@@ -93,7 +93,7 @@ app.post("/auth", (req, res) => {
     try {
         if (emp_id === '' || password === '') {
             message = 'Employee ID and password are required.';
-            return res.redirect('/etc/login');
+            return res.redirect('/www');
         }
 
         // Vulnerable query with direct user input embedding
@@ -104,7 +104,7 @@ app.post("/auth", (req, res) => {
             if (err) {
                 console.log(err)
                 message = err.message;
-                return res.redirect('/etc/login');
+                return res.redirect('/www');
             }
             if (row) {
                 message = '';
@@ -116,13 +116,13 @@ app.post("/auth", (req, res) => {
                 );
             } else {
                 message = 'Invalid employee ID or password.';
-                return res.redirect('/etc/login');
+                return res.redirect('/www');
             }
         });
     } catch (err) {
         console.error("Caught error:", err);
         message = 'An unexpected error occurred.';
-        return res.redirect('/etc/login');
+        return res.redirect('/www');
     } finally {
         console.log("Emp_id entered: " + emp_id, "\nPassword entered: " + password);
     }
