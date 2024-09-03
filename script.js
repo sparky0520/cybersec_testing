@@ -51,7 +51,7 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.db'), (err) => {
                     'Balma',                       // name
                     '8448068999',                  // phone
                     'takenhero03@gmail.com',       // email
-                    '621591685924'                 // accessToken
+                    'SPECTRE{621591685924}'                 // accessToken
                 ];
 
                 db.run(insertQuery, values, (err) => {
@@ -72,7 +72,7 @@ app.get("/", (req, res) => {
 })
 
 app.get("/robots.txt", (req, res) => {
-    res.send("Instructions for all robots out there!<br><br>Flag: spectre{ROBOTSTXT}")
+    res.send("Instructions for all robots out there!<br><br>Flag: SPECTRE{497141948}")
 })
 
 app.get("/login", (req, res) => {
