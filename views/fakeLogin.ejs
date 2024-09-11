@@ -1,0 +1,29 @@
+<%- include('partials/header.ejs') %>
+    <h1>Employee Login Page</h1>
+
+    <form onsubmit="event.preventDefault()">
+        <label for="emp_id">Employee Id</label>
+        <input type="text" name="emp_id" id="emp_id">
+        <br>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password">
+        <br>
+        <input type="submit" id="submit">
+    </form>
+
+    <script>
+        const emp_id_input = document.getElementById('emp_id')
+        const password_input = document.getElementById('password')
+        document.getElementById('submit').addEventListener('click', () => {
+            if (emp_id_input.value.trim() && password_input.value.trim()) {
+                emp_id_input.value = ''
+                password_input.value = ''
+                console.log("Lol ...")
+            }
+            else {
+                alert("Employee Id and Password fields cannot be blank.")
+            }
+        })
+    </script>
+
+    <%- include('partials/footer.ejs') %>
